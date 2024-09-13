@@ -1,0 +1,5 @@
+.vscode
+lua5.1.4/
+obj/
+ca-bundle.crt
+server.exe
