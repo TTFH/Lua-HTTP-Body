@@ -15,10 +15,10 @@ http::response LuaToJsonProxy(const http::request& req) {
 
 	if (request_body.length() == 0)
 		return http::response(status::NO_CONTENT, "Empty request body.");
-	if (content_type != "application/lua" || content_type != "application/x-lua-table")
-		return http::response(status::BAD_REQUEST, "Invalid Content-Type.");
 	if (content_type == "application/json")
 		return http::response(status::BAD_REQUEST, "Json? Who is Jason?");
+	if (content_type != "application/lua" || content_type != "application/x-lua-table")
+		return http::response(status::BAD_REQUEST, "Invalid Content-Type.");
 
 	try {
 		LuaState* L = LuaNewState();
