@@ -39,6 +39,13 @@ std::string LuaGetGlobalString(lua_State* L, const char* name) {
 	return value;
 }
 
+bool LuaIsFunctionDefined(lua_State* L, const char* name) {
+	lua_getglobal(L, name);
+	bool is_function = lua_isfunction(L, -1);
+	lua_pop(L, 1);
+	return is_function;
+}
+
 std::string LuaGlobalTableToJson(lua_State* L, const char* name) {
 	std::string json;
 	lua_getglobal(L, name);
@@ -68,7 +75,7 @@ void LuaJsonToStackTable(lua_State* L, const std::string& json) {
 	lua_remove(L, -2); // Remove json.parse() from stack
 }
 
-std::string LuaRunFunctionStackTableToStr(lua_State* L, const char* name, bool pop) {
+std::string LuaRunFunctionStackTableToStr(lua_State* L, const char* name) {
 	lua_getglobal(L, name);
 	if (!lua_isfunction(L, -1))
 		throw std::invalid_argument("Function is not defined.");
@@ -80,7 +87,12 @@ std::string LuaRunFunctionStackTableToStr(lua_State* L, const char* name, bool p
 	std::string result;
 	if (lua_isstring(L, -1))
 		result = lua_tostring(L, -1);
-	lua_pop(L, 1);
-	if (pop) lua_pop(L, 1);
+	lua_pop(L, 2);
+	return result;
+}
+
+std::string LuaSerializeStackTable(lua_State* L, const char* name) {
+	std::string result = LuaRunFunctionStackTableToStr(L, "dump");
+	result = std::string(name) + " = " + result;
 	return result;
 }

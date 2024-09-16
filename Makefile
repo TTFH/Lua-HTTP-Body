@@ -2,8 +2,8 @@ TARGET = server
 
 CXX = g++
 CXXFLAGS = -Wall -Wextra -Werror -Wpedantic -O3 -g
-LIBS = `pkg-config --libs libcurl --static`
-LIBS += -Llua5.1.4 -llua5.1
+CXXFLAGS += `pkg-config --cflags lua5.1`
+LIBS = -llua5.1
 
 SOURCES = main.cpp
 SOURCES += src/client.cpp src/server.cpp src/lua_utils.cpp
@@ -17,10 +17,12 @@ UNAME_S := $(shell uname -s)
 
 ifeq ($(UNAME_S), Linux)
 	ECHO_MESSAGE = "Linux"
+	LIBS += `pkg-config --libs libcurl`
 endif
 
 ifeq ($(OS), Windows_NT)
 	ECHO_MESSAGE = "MinGW"
+	LIBS += `pkg-config --libs libcurl --static`
 	LIBS += -lWs2_32 -lwsock32
 endif
 

@@ -22,9 +22,11 @@ namespace http {
 
 namespace status {
 	const int OK = 200;
+	const int CREATED = 201;
 	const int NO_CONTENT = 204;
 	const int BAD_REQUEST = 400;
 	const int UNAUTHORIZED = 401;
+	const int UNSUPPORTED_MEDIA_TYPE = 415;
 	const int INTERNAL_SERVER_ERROR = 500;
 };
 

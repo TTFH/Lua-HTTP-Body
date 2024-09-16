@@ -1,3 +1,4 @@
+#include <string.h>
 #include <stdexcept>
 
 #define CURL_STATICLIB
