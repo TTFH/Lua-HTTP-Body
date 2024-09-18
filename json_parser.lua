@@ -179,19 +179,23 @@ function dump(o)
 			if not first_key then
 				s = s .. ", "
 			end
-			if type(k) == "string" and k:match("^[%a_][%w_]*$") then
-				s = s .. k
-			elseif type(k) == "number" then
+			first_key = false
+			if type(k) == "number" then
 				s = s .. "[" .. k .. "]"
+			elseif type(k) == "string" and k:match("^[%a_][%w_]*$") and k ~= "function" then
+				s = s .. k
 			else
 				s = s .. '["' .. k .. '"]'
 			end
 			s = s .. " = " .. dump(v)
-			first_key = false
 		end
 		return s .. " }"
 	elseif type(o) == "string" then
-		return '"' .. o .. '"'
+		if string.find(o, '"') then
+			return "'" .. o .. "'"
+		else
+			return '"' .. o .. '"'
+		end
 	else
 		return tostring(o)
 	end
