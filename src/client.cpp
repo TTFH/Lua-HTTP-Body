@@ -1,7 +1,6 @@
 #include <string.h>
 #include <stdexcept>
 
-#define CURL_STATICLIB
 #include <curl/curl.h>
 
 #include "client.h"

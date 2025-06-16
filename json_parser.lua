@@ -171,13 +171,17 @@ function json.parse(str, pos, end_delim)
 	end
 end
 
-function dump(o)
+function dump(o, depth)
+	depth = depth or 1
 	if type(o) == "table" then
-		local s = "{ "
+		local s = "{\n"
 		local first_key = true
 		for k, v in pairs(o) do
 			if not first_key then
-				s = s .. ", "
+				s = s .. ",\n"
+			end
+			for i = 1, depth do
+				s = s .. "\t"
 			end
 			first_key = false
 			if type(k) == "number" then
@@ -187,16 +191,114 @@ function dump(o)
 			else
 				s = s .. '["' .. k .. '"]'
 			end
-			s = s .. " = " .. dump(v)
+			s = s .. " = " .. dump(v, depth + 1)
 		end
-		return s .. " }"
+		s = s .. "\n"
+		for i = 1, depth - 1 do
+			s = s .. "\t"
+		end
+		return s .. "}"
 	elseif type(o) == "string" then
-		if string.find(o, '"') then
+		if string.find(o, '"') and not string.find(o, "'") then
 			return "'" .. o .. "'"
 		else
-			return '"' .. o .. '"'
+			return string.format("%q", o)
 		end
 	else
 		return tostring(o)
 	end
 end
+
+function serialize(o)
+	if type(o) == "table" then
+		local s = "{"
+		for k, v in pairs(o) do
+			if type(k) == "number" then
+				s = s .. "[" .. k .. "]"
+			else
+				s = s .. '["' .. k .. '"]'
+			end
+			s = s .. "=" .. serialize(v) .. ","
+		end
+		s = s .. "}"
+		return s
+	else
+		if type(o) == "string" then
+			return string.format("%q", o)
+		else
+			return tostring(o)
+		end
+	end
+end
+
+function deserialize(str)
+	local f = loadstring("return " .. str)
+	if f then
+		return f()
+	else
+		return nil
+	end
+end
+
+local BASE64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+
+function base64decode(data)
+	data = string.gsub(data, "[^" .. BASE64_CHARS .. "=]", "")
+	local res = data:gsub(
+		".",
+		function(x)
+			if x == "=" then
+				return ""
+			end
+			local r, f = "", BASE64_CHARS:find(x) - 1
+			for i = 6, 1, -1 do
+				r = r .. (f % 2 ^ i - f % 2 ^ (i - 1) > 0 and "1" or "0")
+			end
+			return r
+		end
+	):gsub(
+		"%d%d%d?%d?%d?%d?%d?%d?",
+		function(x)
+			if #x ~= 8 then
+				return ""
+			end
+			local c = 0
+			for i = 1, 8 do
+				c = c + (x:sub(i, i) == "1" and 2 ^ (8 - i) or 0)
+			end
+			return string.char(c)
+		end
+	)
+	return res
+end
+
+function readonly(table)
+	return setmetatable({}, {
+	 __index = table,
+	 __newindex = function(table, key, value)
+					error("Attempt to modify read-only table")
+				  end,
+	 __metatable = false
+	});
+end
+
+function Vec(x, y, z)
+	return readonly { x, y, z }
+end
+
+function InvertY(v)
+	--v[2] = -v[2]
+	return Vec(v[1], -v[2], v[3])
+end
+
+function VecStr(name, v)
+	local str = string.format("%s = (%d, %d, %d)", name, v[1], v[2], v[3])
+	print(str)
+end
+
+--[[
+local a = Vec(1, 2, 3)
+local b = InvertY(a)
+VecStr("a", a)
+VecStr("b", b)
+]]

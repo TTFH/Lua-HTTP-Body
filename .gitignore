@@ -1,5 +1,5 @@
 .vscode
-lua5.1.4/
+.luarc.json
 obj/
 ca-bundle.crt
 server.exe
